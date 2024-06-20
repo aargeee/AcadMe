@@ -1,0 +1,1 @@
+Entity Relationship Diagram of the Application is available [here](https://app.eraser.io/workspace/7shMRdYchceAQmvJ7pg0?origin=share)
