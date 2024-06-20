@@ -41,6 +41,9 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    # local apps
+    "iam",
+    "course",
     # third party apps
     "corsheaders",
     "rest_framework",
