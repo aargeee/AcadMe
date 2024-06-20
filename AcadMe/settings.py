@@ -118,6 +118,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTH_USER_MODEL = "iam.AppUser"
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
@@ -170,6 +171,7 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "EXCEPTION_HANDLER": "drf_standardized_errors.handler.exception_handler",
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
 DRF_STANDARDIZED_ERRORS = {
@@ -189,3 +191,10 @@ CORS_ALLOW_METHODS = [
 ]
 
 PAGINATION_PAGE_SIZE = 10
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "AcadMe",
+    "DESCRIPTION": "Connecting Teachers and Students.",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+}
