@@ -97,8 +97,8 @@ class Content(BaseModel):
 
     name = models.CharField(max_length=64)
     type = models.CharField(choices=ContentType.choices)
-    textUrl = models.URLField()
-    videoUrl = models.URLField()
+    textUrl = models.URLField(blank=True)
+    videoUrl = models.URLField(blank=True)
     position = models.SmallIntegerField(blank=False, null=False)
     isLastContent = models.BooleanField(default=False)
     chapter = models.ForeignKey(Chapter, on_delete=models.CASCADE)
