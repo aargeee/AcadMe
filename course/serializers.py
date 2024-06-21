@@ -26,7 +26,7 @@ class CourseSerializer(serializers.ModelSerializer):
 class ContentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Content
-        fields = ["id", "name", "fileUrl", "position"]
+        fields = ["id", "name", "position"]
 
 
 class ChapterSerializer(serializers.ModelSerializer):
@@ -74,3 +74,9 @@ class CourseDetailSerializer(serializers.ModelSerializer):
 
     def get_enrolled_count(self, obj):
         return Enrollment.objects.filter(course=obj).count()
+
+
+class ContentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Content
+        fields = ["id", "name", "content", "position", "chapter"]

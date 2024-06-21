@@ -5,8 +5,13 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.exceptions import ValidationError, NotAuthenticated
 
-from .models import Course, CourseTutor, Category
-from .serializers import CourseSerializer, CourseDetailSerializer, CategorySerializer
+from .models import Course, CourseTutor, Category, Content
+from .serializers import (
+    CourseSerializer,
+    CourseDetailSerializer,
+    CategorySerializer,
+    ContentSerializer,
+)
 from AcadMe.pagination import CustomPagination
 from AcadMe.permissions import HasPermission
 
@@ -149,3 +154,14 @@ class CategoryManageView(APIView):
         category.delete()
         response = {"success": True, "data": []}
         return Response(data=response, status=status.HTTP_202_ACCEPTED)
+
+
+class ContentView(APIView):
+    permission_classes = [HasPermission]
+    permission_dict = {}
+
+    def get(self, request: Request, contentid: UUID):
+        content = get_object_or_404(Content, id=contentid)
+        serialized = ContentSerializer(content)
+        response = {"success": True, "data": serialized.data}
+        return Response(data=response, status=status.HTTP_200_OK)

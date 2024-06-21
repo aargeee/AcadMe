@@ -5,6 +5,7 @@ from .views import (
     SearchAndFilterView,
     CategoryListCreateView,
     CategoryManageView,
+    ContentView,
 )
 
 urlpatterns = [
@@ -17,4 +18,5 @@ urlpatterns = [
         CategoryManageView.as_view(),
         name="category-manage",
     ),
+    path("content/<uuid:contentid>/", ContentView.as_view(), name="content-view"),
 ]
