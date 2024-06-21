@@ -11,10 +11,20 @@ from django.contrib.auth.models import update_last_login
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 from rest_framework import status
 
+from drf_spectacular.utils import extend_schema, OpenApiResponse
+
 
 class LoginView(APIView):
     permission_classes = []
+    serializer_class = LoginSerializer
 
+    @extend_schema(
+        summary="Login as a user",
+        responses={
+            201: OpenApiResponse(description="Access Token and Refresh Token"),
+            400: OpenApiResponse(description="Bad request (something invalid)"),
+        },
+    )
     def post(self, request: Request) -> Response:
         serializer = LoginSerializer(data=request.data)
         if not serializer.is_valid():
