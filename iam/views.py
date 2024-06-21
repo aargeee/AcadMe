@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from .serializers import LoginSerializer
+from .serializers import LoginSerializer, TutorSignupSerializer, LearnerSignupSerializer
 from rest_framework.exceptions import ValidationError
 
 from django.contrib.auth import authenticate
@@ -12,6 +12,8 @@ from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 from rest_framework import status
 
 from drf_spectacular.utils import extend_schema, OpenApiResponse
+
+from iam.models import AppUser
 
 
 class LoginView(APIView):
@@ -48,3 +50,51 @@ class LoginView(APIView):
         }
 
         return Response(data=response, status=status.HTTP_200_OK)
+
+
+class LearnerSignupView(APIView):
+    permission_classes = []
+    serializer_class = LearnerSignupSerializer
+
+    def post(self, request: Request) -> Response:
+        serializer = LearnerSignupSerializer(data=request.data)
+        if not serializer.is_valid():
+            raise ValidationError(detail=serializer.errors)
+
+        user: AppUser = serializer.save()
+
+        response_data = {
+            "success": True,
+            "data": {
+                "id": user.id,
+                "username": user.username,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                "role": user.role,
+            },
+        }
+        return Response(data=response_data, status=status.HTTP_201_CREATED)
+
+
+class TutorSignupView(APIView):
+    permission_classes = []
+    serializer_class = TutorSignupSerializer
+
+    def post(self, request: Request) -> Response:
+        serializer = TutorSignupSerializer(data=request.data)
+        if not serializer.is_valid():
+            raise ValidationError(detail=serializer.errors)
+
+        user: AppUser = serializer.save()
+
+        response_data = {
+            "success": True,
+            "data": {
+                "id": user.id,
+                "username": user.username,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                "role": user.role,
+            },
+        }
+        return Response(data=response_data, status=status.HTTP_201_CREATED)

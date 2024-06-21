@@ -175,7 +175,7 @@ REST_FRAMEWORK = {
 }
 
 DRF_STANDARDIZED_ERRORS = {
-    "EXCEPTION_FORMATTER_CLASS": "common.error_formatter.CustomExceptionFormatter"
+    "EXCEPTION_HANDLER": "drf_standardized_errors.handler.exception_handler"
 }
 
 CORS_ALLOW_ALL_ORIGINS = True
