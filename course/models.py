@@ -36,10 +36,10 @@ class Course(BaseModel):
     class Meta:
         default_permissions = ()
         permissions = (
-            ("add_category", "Create Category"),
-            ("view_category", "View Category"),
-            ("change_category", "Update Category"),
-            ("delete_category", "Delete Category"),
+            ("add_course", "Create Course"),
+            ("view_course", "View Course"),
+            ("change_course", "Update Course"),
+            ("delete_course", "Delete Course"),
         )
 
 
