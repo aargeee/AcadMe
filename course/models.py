@@ -15,6 +15,15 @@ class Category(BaseModel):
     def __str__(self) -> str:
         return f"Category {self.name}"
 
+    class Meta:
+        default_permissions = ()
+        permissions = (
+            ("add_category", "Create Category"),
+            ("view_category", "View Category"),
+            ("change_category", "Update Category"),
+            ("delete_category", "Delete Category"),
+        )
+
 
 class Course(BaseModel):
     name = models.CharField(max_length=64)
@@ -23,6 +32,15 @@ class Course(BaseModel):
 
     def __str__(self) -> str:
         return f"Course {self.name}"
+
+    class Meta:
+        default_permissions = ()
+        permissions = (
+            ("add_category", "Create Category"),
+            ("view_category", "View Category"),
+            ("change_category", "Update Category"),
+            ("delete_category", "Delete Category"),
+        )
 
 
 class Enrollment(BaseModel):
@@ -132,7 +150,7 @@ class Content(BaseModel):
         return f"{self.chapter.name} > {self.name}"
 
 
-class TopicCompletionLog(BaseModel):
+class ContentCompletionLog(BaseModel):
     created_at = models.DateTimeField(verbose_name=_("Created At"), auto_now_add=True)
     learner = models.ForeignKey(USER, on_delete=models.CASCADE)
     content = models.ForeignKey(Content, on_delete=models.CASCADE)
@@ -144,3 +162,12 @@ class TopicCompletionLog(BaseModel):
 
     def __str__(self) -> str:
         return f"{self.content.name} > {self.learner.get_username()}"
+
+    class Meta:
+        default_permissions = ()
+        permissions = (
+            ("add_completionlog", "Create Completion Log"),
+            ("view_completionlog", "View Completion Log"),
+            ("change_completionlog", "Update Completion Log"),
+            ("delete_completionlog", "Delete Completion Log"),
+        )

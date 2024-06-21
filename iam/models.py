@@ -47,16 +47,17 @@ class AppUser(AbstractBaseUser, PermissionsMixin):
     # AbstractBaseUser: password and last_login.
     # PermissionsMixin: is_superuser, groups and user_permissions.
 
-    username_validator = UnicodeUsernameValidator()
+    username_validator = UnicodeUsernameValidator(
+        regex=r"^[a-zA-Z0-9_]+$",
+        message="Enter a valid username. This value may contain only letters, numbers, and _ character.",
+    )
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     username = models.CharField(
         _("username"),
         max_length=150,
         unique=True,
-        help_text=_(
-            "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."
-        ),
+        help_text=_("Required. 150 characters or fewer. Letters, digits and _ only."),
         validators=[username_validator],
         error_messages={
             "unique": _("A user with that username already exists."),

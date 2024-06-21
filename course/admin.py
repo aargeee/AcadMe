@@ -6,7 +6,7 @@ from .models import (
     CourseTutor,
     Chapter,
     Course,
-    TopicCompletionLog,
+    ContentCompletionLog,
     Category,
 )
 
@@ -16,4 +16,4 @@ admin.site.register(Enrollment)
 admin.site.register(CourseTutor)
 admin.site.register(Chapter)
 admin.site.register(Content)
-admin.site.register(TopicCompletionLog)
+admin.site.register(ContentCompletionLog)
