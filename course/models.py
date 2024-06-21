@@ -4,7 +4,6 @@ from AcadMe.models import BaseModel
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 from iam.models import AppUser
-from django.core.exceptions import ValidationError
 
 USER = get_user_model()
 
@@ -85,6 +84,7 @@ class CourseTutor(BaseModel):
 
 class Chapter(BaseModel):
     class Meta:
+        ordering = ["position"]
         constraints = [
             models.UniqueConstraint(
                 fields=["course", "position"], name="unique_position_per_course"
@@ -94,7 +94,7 @@ class Chapter(BaseModel):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     name = models.CharField(max_length=64)
     position = models.SmallIntegerField(blank=False, null=False)
-    isLastChapter = models.BooleanField(default=False)
+    completed = models.BooleanField(default=False)
 
     def __str__(self) -> str:
         return f"{self.course.name} > {self.name}"
@@ -102,45 +102,18 @@ class Chapter(BaseModel):
 
 class Content(BaseModel):
     class Meta:
+        ordering = ["position"]
         constraints = [
             models.UniqueConstraint(
                 fields=["chapter", "position"], name="unique_position_per_chapter"
             )
         ]
 
-    class ContentType(models.TextChoices):
-        TEXT = "TEXT", _("TEXT")
-        VIDEO = "VIDEO", _("VIDEO")
-        BOTH = "BOTH", _("BOTH")
-
     name = models.CharField(max_length=64)
-    type = models.CharField(choices=ContentType.choices)
-    textUrl = models.URLField(blank=True)
-    videoUrl = models.URLField(blank=True)
+    fileUrl = models.URLField()
     position = models.SmallIntegerField(blank=False, null=False)
-    isLastContent = models.BooleanField(default=False)
     chapter = models.ForeignKey(Chapter, on_delete=models.CASCADE)
-
-    def clean(self):
-        super().clean()
-
-        if self.type == self.ContentType.TEXT and not self.textUrl:
-            raise ValidationError(
-                {"textUrl": _("Text URL is required when content type is TEXT.")}
-            )
-        if self.type == self.ContentType.VIDEO and not self.videoUrl:
-            raise ValidationError(
-                {"videoUrl": _("Video URL is required when content type is VIDEO.")}
-            )
-        if self.type == self.ContentType.BOTH:
-            if not self.textUrl:
-                raise ValidationError(
-                    {"textUrl": _("Text URL is required when content type is BOTH.")}
-                )
-            if not self.videoUrl:
-                raise ValidationError(
-                    {"videoUrl": _("Video URL is required when content type is BOTH.")}
-                )
+    completed = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         self.clean()
