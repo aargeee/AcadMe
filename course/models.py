@@ -110,7 +110,7 @@ class Content(BaseModel):
         ]
 
     name = models.CharField(max_length=64)
-    fileUrl = models.URLField()
+    content = models.TextField()
     position = models.SmallIntegerField(blank=False, null=False)
     chapter = models.ForeignKey(Chapter, on_delete=models.CASCADE)
     completed = models.BooleanField(default=False)
