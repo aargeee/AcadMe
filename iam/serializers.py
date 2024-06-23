@@ -3,8 +3,9 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from iam.models import AppUser
-
-from rest_framework_simplejwt.tokens import RefreshToken
+from course.models import *
+from django.db.models.functions import Cast
+from django.db.models import DateField, Count
 
 USER = get_user_model()
 
@@ -69,3 +70,44 @@ class TutorListSerializer(serializers.ModelSerializer):
         model = USER
         fields = ["id", "username", "first_name", "last_name"]
         
+class CourseSerializer(serializers.ModelSerializer):
+    category_name = serializers.SerializerMethodField()
+    class Meta:
+        model = Course
+        fields = ["id", "name", "description", "category_name"]
+    def get_category_name(self, obj):
+        return obj.category.name
+
+class EnrollmentSerializer(serializers.ModelSerializer):
+    course = CourseSerializer()
+
+    class Meta:
+        model = Enrollment
+        fields = ["course"]
+
+class ContentCompletionLogSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContentCompletionLog
+        fields = ["content", "created_at"]
+
+class LearnerProfileSerializer(serializers.ModelSerializer):
+    enrolled_courses = EnrollmentSerializer(many=True, source="enrollment_set")
+    content_completion_by_date = serializers.SerializerMethodField()
+
+    class Meta:
+        model = USER
+        fields = ["id", "username", "first_name", "last_name", "enrolled_courses", "content_completion_by_date"]
+
+    def get_content_completion_by_date(self, obj):
+        # Get count of content completed each day
+        completion_logs = (
+            ContentCompletionLog.objects
+            .filter(learner=obj)
+            .annotate(date=Cast('created_at', DateField()))
+            .values('date')
+            .annotate(count=Count('id'))
+            .order_by('date')
+        )
+
+        # Format the data for easy consumption
+        return {log['date'].strftime('%Y-%m-%d'): log['count'] for log in completion_logs}

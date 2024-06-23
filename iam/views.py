@@ -2,9 +2,9 @@
 from rest_framework.views import APIView
 from rest_framework.request import Request
 from rest_framework.response import Response
-
-from .serializers import LoginSerializer, TutorSignupSerializer, LearnerSignupSerializer, TutorListSerializer
+from django.db.models.functions import Cast
 from rest_framework.exceptions import ValidationError
+from django.db.models import DateField, Count
 
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import update_last_login
@@ -15,8 +15,10 @@ from rest_framework import status
 from django.contrib.auth import get_user_model
 
 from drf_spectacular.utils import extend_schema, OpenApiResponse
+from django.shortcuts import get_object_or_404
 
 from iam.models import AppUser
+from .serializers import *
 
 USER = get_user_model()
 
@@ -118,3 +120,11 @@ class TutorsListView(APIView):
             "data": serialized.data
         }
         return Response(data=response_data, status=status.HTTP_200_OK)
+
+class ProfileView(APIView):
+    permission_classes = []
+
+    def get(self, request, username: str):
+        user = get_object_or_404(USER, username=username)
+        profile_data = LearnerProfileSerializer(user).data
+        return Response(data={"success": True, "data": profile_data}, status=status.HTTP_200_OK)

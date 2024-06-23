@@ -6,7 +6,7 @@ from rest_framework import status
 from rest_framework.exceptions import ValidationError, NotAuthenticated
 from rest_framework.permissions import IsAuthenticated
 
-from .models import Course, CourseTutor, Category, Content
+from .models import Course, CourseTutor, Category, Content, Enrollment
 from .serializers import (
     CourseSerializer,
     CourseDetailSerializer,
@@ -55,7 +55,8 @@ class CourseDetailView(APIView):
     def post(self, request: Request, courseid: UUID) -> Response:
         course = get_object_or_404(Course, id=courseid)
         logs = ContentCompletionLog.objects.filter(learner=request.user, content__chapter__course=course)
-        response = {"success": True, "data": {"content_id": logs.values_list('content_id', flat=True)}}
+        enrolled = Enrollment.objects.filter(course=course, learner=request.user).exists()
+        response = {"success": True, "data": {"content_id": logs.values_list('content_id', flat=True), "enrolled": enrolled}}
         return Response(data=response, status=status.HTTP_200_OK)
 
 
@@ -157,6 +158,25 @@ class ContentView(APIView):
 
     def get(self, request: Request, contentid: UUID):
         content = get_object_or_404(Content, id=contentid)
+        if not Enrollment.objects.filter(course=content.chapter.course, learner=request.user).exists():
+            raise ValidationError("User not enrolled in course")
         serialized = ContentSerializer(content)
         response = {"success": True, "data": serialized.data}
         return Response(data=response, status=status.HTTP_200_OK)
+
+class LearnerEnrollView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request: Request, courseid: UUID):
+        course = get_object_or_404(Course, id=courseid)
+        enrollment = Enrollment.objects.create(learner=request.user, course=course)
+        enrollment.save()
+        return Response(data={"success": True, "data": []}, status=status.HTTP_202_ACCEPTED)
+
+class ContentMarkCompleteView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request: Request, contentid: UUID):
+        content = get_object_or_404(Content, id=contentid)
+        ContentCompletionLog.objects.create(learner=request.user, content=content).save()
+        return Response(data={"success": True, "data": []}, status=status.HTTP_202_ACCEPTED)
