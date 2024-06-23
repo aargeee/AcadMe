@@ -26,7 +26,7 @@ class CourseSerializer(serializers.ModelSerializer):
 class ContentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Content
-        fields = ["id", "name", "position"]
+        fields = ["id", "name", "position", "type"]
 
 
 class ChapterSerializer(serializers.ModelSerializer):
@@ -79,4 +79,4 @@ class CourseDetailSerializer(serializers.ModelSerializer):
 class ContentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Content
-        fields = ["id", "name", "content", "position", "chapter"]
+        fields = ["id", "name", "content", "position", "chapter", "type"]

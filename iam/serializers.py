@@ -4,6 +4,8 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from iam.models import AppUser
 
+from rest_framework_simplejwt.tokens import RefreshToken
+
 USER = get_user_model()
 
 
@@ -14,7 +16,6 @@ class LoginSerializer(serializers.Serializer):
     def validate(self, data):
         data["username"] = data.get("username").lower()
         return data
-
 
 class TutorSignupSerializer(serializers.ModelSerializer):
     class Meta:
@@ -66,3 +67,9 @@ class LearnerSignupSerializer(serializers.ModelSerializer):
 
         # Clear any default groups and add user to 'learner' group
         return user
+
+class TutorListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = USER
+        fields = ["id", "username", "first_name", "last_name"]
+        

@@ -4,12 +4,13 @@ from AcadMe.models import BaseModel
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 from iam.models import AppUser
+from django.core.exceptions import ValidationError
 
 USER = get_user_model()
 
 
 class Category(BaseModel):
-    name = models.CharField(max_length=64)
+    name = models.CharField(max_length=64, unique=True)
 
     def __str__(self) -> str:
         return f"Category {self.name}"
@@ -109,11 +110,27 @@ class Content(BaseModel):
             )
         ]
 
+    class TYPES(models.TextChoices):
+        HTML = "HTML",_("HTML")
+        VIDEO = "VIDEO",_("VIDEO")
+
     name = models.CharField(max_length=64)
     content = models.TextField()
+    type = models.CharField(choices=TYPES.choices)
     position = models.SmallIntegerField(blank=False, null=False)
     chapter = models.ForeignKey(Chapter, on_delete=models.CASCADE)
     completed = models.BooleanField(default=False)
+
+    def clean(self):
+        super().clean()
+        if self.type == self.TYPES.VIDEO:
+            from django.core.validators import URLValidator
+            url_validator = URLValidator()
+            try:
+                url_validator(self.content)
+            except ValidationError:
+                raise ValidationError({'content': _('Content must be a valid URL for VIDEO type.')})
+
 
     def save(self, *args, **kwargs):
         self.clean()

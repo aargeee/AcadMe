@@ -12,7 +12,6 @@ from .serializers import (
     CategorySerializer,
     ContentSerializer,
 )
-from AcadMe.pagination import CustomPagination
 from AcadMe.permissions import HasPermission
 
 from django.shortcuts import get_object_or_404
@@ -60,15 +59,7 @@ class SearchAndFilterView(APIView):
         if search:
             q.add(Q(name__icontains=search), Q.AND)
 
-        paginator = CustomPagination()
         res = Course.objects.filter(q)
-
-        page = paginator.paginate_queryset(res, request)
-        if page is not None:
-            serialized = CourseSerializer(page, many=True)
-            return paginator.get_paginated_response(
-                object_name="courses", data=serialized.data
-            )
 
         serialized = CourseSerializer(res, many=True)
         return Response({"success": True, "courses": serialized.data})
@@ -92,17 +83,12 @@ class SearchAndFilterView(APIView):
                 tutor__id__in=tutor_ids
             ).values_list("course_id", flat=True)
             q.add(Q(id__in=courses_with_tutors), Q.AND)
+        
+        name = data.get("course")
+        if name:
+            q.add(Q(name__icontains=name), Q.AND)
 
-        paginator = CustomPagination()
         res = Course.objects.filter(q)
-
-        page = paginator.paginate_queryset(res, request)
-        if page is not None:
-            serialized = CourseSerializer(page, many=True)
-            return paginator.get_paginated_response(
-                object_name="courses", data=serialized.data
-            )
-
         serialized = CourseSerializer(res, many=True)
         return Response({"success": True, "courses": serialized.data})
 

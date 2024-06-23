@@ -3,18 +3,22 @@ from rest_framework.views import APIView
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from .serializers import LoginSerializer, TutorSignupSerializer, LearnerSignupSerializer
+from .serializers import LoginSerializer, TutorSignupSerializer, LearnerSignupSerializer, TutorListSerializer
 from rest_framework.exceptions import ValidationError
 
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import update_last_login
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
+from rest_framework_simplejwt.views import TokenRefreshView
+from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 from rest_framework import status
+from django.contrib.auth import get_user_model
 
 from drf_spectacular.utils import extend_schema, OpenApiResponse
 
 from iam.models import AppUser
 
+USER = get_user_model()
 
 class LoginView(APIView):
     permission_classes = []
@@ -45,12 +49,15 @@ class LoginView(APIView):
             "success": True,
             "data": {
                 "access_token": str(access_token),
-                "refresg_token": str(refresh_token),
+                "refresh_token": str(refresh_token),
             },
         }
 
         return Response(data=response, status=status.HTTP_200_OK)
 
+class CustomTokenRefreshView(TokenRefreshView):
+    permission_classes = []
+    serializer_class = TokenRefreshSerializer
 
 class LearnerSignupView(APIView):
     permission_classes = []
@@ -98,3 +105,15 @@ class TutorSignupView(APIView):
             },
         }
         return Response(data=response_data, status=status.HTTP_201_CREATED)
+    
+class TutorsListView(APIView):
+    permission_classes = []
+
+    def get(self, request: Request) -> Response:
+        tutors = USER.objects.filter(role = "TUTOR")
+        serialized = TutorListSerializer(tutors, many=True)
+        response_data = {
+            "success": True,
+            "data": serialized.data
+        }
+        return Response(data=response_data, status=status.HTTP_200_OK)
