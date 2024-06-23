@@ -148,6 +148,8 @@ class ContentCompletionLog(BaseModel):
     def save(self, *args, **kwargs):
         if self.learner.role != AppUser.ROLES.LEARNER:
             raise ValueError("Only Students can enroll in a course.")
+        if not Enrollment.objects.filter(course=self.content.chapter.course, learner=self.learner).exists():
+            raise ValidationError("Learner is not enrolled in the course related to this content.")
         super().save(*args, **kwargs)
 
     def __str__(self) -> str:

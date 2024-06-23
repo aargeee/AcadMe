@@ -13,10 +13,6 @@ class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField()
 
-    def validate(self, data):
-        data["username"] = data.get("username").lower()
-        return data
-
 class TutorSignupSerializer(serializers.ModelSerializer):
     class Meta:
         model = AppUser

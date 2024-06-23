@@ -50,6 +50,7 @@ class LoginView(APIView):
             "data": {
                 "access_token": str(access_token),
                 "refresh_token": str(refresh_token),
+                "role": user.role
             },
         }
 

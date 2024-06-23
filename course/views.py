@@ -4,6 +4,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.exceptions import ValidationError, NotAuthenticated
+from rest_framework.permissions import IsAuthenticated
 
 from .models import Course, CourseTutor, Category, Content
 from .serializers import (
@@ -11,6 +12,8 @@ from .serializers import (
     CourseDetailSerializer,
     CategorySerializer,
     ContentSerializer,
+    ContentCompletionSerializer,
+    ContentCompletionLogSerializer
 )
 from AcadMe.permissions import HasPermission
 
@@ -18,6 +21,7 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Q
 
 from uuid import UUID
+from .models import ContentCompletionLog
 
 
 class CourseView(APIView):
@@ -40,13 +44,18 @@ class CourseView(APIView):
 
 
 class CourseDetailView(APIView):
-    permission_classes = [HasPermission]
-    permission_dict = {}
+    permission_classes = []
 
-    def get(self, _request: Request, courseid: UUID) -> Response:
+    def get(self, request: Request, courseid: UUID) -> Response:
         course = get_object_or_404(Course, id=courseid)
         serialized = CourseDetailSerializer(course)
         response = {"success": True, "data": serialized.data}
+        return Response(data=response, status=status.HTTP_200_OK)
+    
+    def post(self, request: Request, courseid: UUID) -> Response:
+        course = get_object_or_404(Course, id=courseid)
+        logs = ContentCompletionLog.objects.filter(learner=request.user, content__chapter__course=course)
+        response = {"success": True, "data": {"content_id": logs.values_list('content_id', flat=True)}}
         return Response(data=response, status=status.HTTP_200_OK)
 
 
@@ -62,7 +71,7 @@ class SearchAndFilterView(APIView):
         res = Course.objects.filter(q)
 
         serialized = CourseSerializer(res, many=True)
-        return Response({"success": True, "courses": serialized.data})
+        return Response({"success": True, "data": {"courses": serialized.data}})
 
     def post(self, request: Request) -> Response:
         data = request.data
@@ -90,7 +99,7 @@ class SearchAndFilterView(APIView):
 
         res = Course.objects.filter(q)
         serialized = CourseSerializer(res, many=True)
-        return Response({"success": True, "courses": serialized.data})
+        return Response({"success": True, "data": {"courses": serialized.data}})
 
 
 class CategoryListCreateView(APIView):
@@ -143,7 +152,7 @@ class CategoryManageView(APIView):
 
 
 class ContentView(APIView):
-    permission_classes = [HasPermission]
+    permission_classes = [IsAuthenticated]
     permission_dict = {}
 
     def get(self, request: Request, contentid: UUID):

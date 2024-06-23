@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Course, Content, Chapter, CourseTutor, Enrollment, Category
+from .models import Course, Content, Chapter, CourseTutor, Enrollment, Category, ContentCompletionLog
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -80,3 +80,16 @@ class ContentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Content
         fields = ["id", "name", "content", "position", "chapter", "type"]
+
+class ContentCompletionSerializer(serializers.Serializer):
+    course_id = serializers.UUIDField()
+
+class ContentCompletionLogSerializer(serializers.ModelSerializer):
+    content_id = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ContentCompletionLog
+        fields = ["content_id"]
+
+    def get_content_id(self, obj: ContentCompletionLog):
+        return obj.content.id
